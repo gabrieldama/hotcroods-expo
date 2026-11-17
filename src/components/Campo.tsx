@@ -1,29 +1,28 @@
-import { paleta } from "@/constants/paleta";
-import { StyleSheet, Text, TouchableOpacity, ViewStyle } from "react-native";
+import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
+import { paleta } from '@/constants/paleta';
 
-type Props = {
-  texto: string;
-  onPress: () => void;
-  escuro?: boolean;
-  style?: ViewStyle;
-};
+// TextInputProps = aceita tudo que um TextInput aceita (value, onChangeText, placeholder...)
+type Props = TextInputProps & { rotulo?: string };
 
-export function Botao({ texto, onPress, escuro, style }: Props) {
+// Campo de texto com título em cima
+export function Campo({ rotulo, ...props }: Props) {
   return (
-    <TouchableOpacity
-      style={[
-        s.botao,
-        { backgroundColor: escuro ? paleta.escuro : paleta.vermelho },
-        style,
-      ]}
-      onPress={onPress}
-    >
-      <Text style={s.texto}>{texto}</Text>
-    </TouchableOpacity>
+    <View style={s.grupo}>
+      {rotulo && <Text style={s.rotulo}>{rotulo}</Text>}
+      <TextInput style={s.input} placeholderTextColor={paleta.bordaCampo} {...props} />
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  botao: { borderRadius: 12, paddingVertical: 14, alignItems: "center" },
-  texto: { color: paleta.branco, fontSize: 16, fontWeight: "bold" },
+  grupo: { marginBottom: 20 },
+  rotulo: { fontSize: 13, fontWeight: 'bold', marginBottom: 6, marginLeft: 6 },
+  input: {
+    height: 46,
+    backgroundColor: paleta.branco,
+    borderWidth: 1,
+    borderColor: paleta.bordaCampo,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+  },
 });
