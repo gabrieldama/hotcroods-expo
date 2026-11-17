@@ -1,17 +1,29 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Botao } from "@/components/Botao";
+import { paleta } from "@/constants/paleta";
+import { router } from "expo-router";
+import { Image, StyleSheet, View } from "react-native";
 
-export default function Index() {
+export default function BoasVindas() {
   return (
-    <View style={styles.container}>
-      <Text>Edit src/app/index.tsx to edit this screen.</Text>
+    <View style={s.tela}>
+      <View style={s.centro}>
+        <Image
+          source={require("../../assets/images/logo.png")}
+          style={s.logo}
+        />
+      </View>
+      <Botao texto="Entrar" onPress={() => router.push("/login")} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const s = StyleSheet.create({
+  tela: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: paleta.fundo,
+    padding: 20,
+    paddingBottom: 40,
   },
+  centro: { flex: 1, justifyContent: "center", alignItems: "center" },
+  logo: { width: 300, height: 295 },
 });
