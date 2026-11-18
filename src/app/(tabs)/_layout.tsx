@@ -1,3 +1,4 @@
+import { paleta } from "@/constants/paleta";
 import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
@@ -5,10 +6,15 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { backgroundColor: "#16355D" },
-        tabBarActiveTintColor: "#DF383B",
-        tabBarInactiveTintColor: "#FFFFFF",
+        tabBarStyle: {
+          backgroundColor: paleta.azul,
+          height: 80,
+          paddingTop: 16,
+        },
+        tabBarActiveTintColor: paleta.vermelho,
+        tabBarInactiveTintColor: paleta.branco,
         tabBarIcon: () => null,
+        tabBarLabelStyle: { fontSize: 13, fontWeight: "bold" },
       }}
     >
       <Tabs.Screen name="inicio" options={{ title: "Início" }} />
