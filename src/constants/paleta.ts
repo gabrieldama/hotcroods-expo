@@ -6,7 +6,8 @@ export const paleta = {
   branco: "#FFFFFF",
   borda: "#E5E7EB",
   bordaCampo: "#D9D9D9",
-  cinza: "#EFEFEF",
+  cinza: "#9AA1AB",
+  cinzaClaro: "#EFEFEF", // fundo da barra de baixo
   textoPreco: "#4D4C4C",
   verde: "#63DB6B",
   amarelo: "#FFF838",

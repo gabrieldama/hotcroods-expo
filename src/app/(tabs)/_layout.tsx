@@ -7,12 +7,12 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: paleta.cinza,
+          backgroundColor: paleta.cinzaClaro,
           height: 80,
           paddingTop: 16,
         },
         tabBarActiveTintColor: paleta.vermelho,
-        tabBarInactiveTintColor: paleta.branco,
+        tabBarInactiveTintColor: paleta.escuro,
         tabBarIcon: () => null,
         tabBarLabelStyle: { fontSize: 13, fontWeight: "bold" },
       }}
