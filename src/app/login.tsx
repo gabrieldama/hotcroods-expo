@@ -1,20 +1,28 @@
 import { Botao } from "@/components/Botao";
 import { Campo } from "@/components/Campo";
 import { estilosAuth as s } from "@/components/estilosAuth";
+import { salvarUsuario } from "@/data/sessao";
+import { login } from "@/services/api";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text } from "react-native";
 
 export default function Login() {
-  const [cpf, setCpf] = useState("");
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  function entrar() {
-    if (!cpf || !senha) {
-      Alert.alert("Atenção", "Preencha CPF e senha.");
+  async function entrar() {
+    if (!email || !senha) {
+      Alert.alert("Atenção", "Preencha e-mail e senha.");
       return;
     }
-    router.replace("/inicio");
+    try {
+      const usuario = await login(email, senha); // POST /usuario/login
+      salvarUsuario(usuario);                     // guarda quem entrou
+      router.replace("/inicio");
+    } catch (erro) {
+      Alert.alert("Erro", String((erro as Error).message));
+    }
   }
 
   return (
@@ -23,11 +31,12 @@ export default function Login() {
       <Text style={s.titulo}>Bem-vindo{"\n"}de volta!</Text>
 
       <Campo
-        rotulo="CPF"
-        placeholder="Digite seu CPF"
-        value={cpf}
-        onChangeText={setCpf}
-        keyboardType="numeric"
+        rotulo="E-mail"
+        placeholder="Digite seu E-mail"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
       />
       <Campo
         rotulo="Senha"

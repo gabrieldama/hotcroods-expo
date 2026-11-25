@@ -1,6 +1,7 @@
 import { Botao } from "@/components/Botao";
 import { Campo } from "@/components/Campo";
 import { estilosAuth as s } from "@/components/estilosAuth";
+import { cadastrar } from "@/services/api";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text } from "react-native";
@@ -11,13 +12,18 @@ export default function Cadastro() {
   const [cpf, setCpf] = useState("");
   const [senha, setSenha] = useState("");
 
-  function criarConta() {
+  async function criarConta() {
     if (!nome || !email || !cpf || !senha) {
       Alert.alert("Atenção", "Preencha todos os campos.");
       return;
     }
-    Alert.alert("Pronto!", "Conta criada. Agora faça login.");
-    router.replace("/login");
+    try {
+      await cadastrar(nome, cpf, email, senha); // POST /usuario
+      Alert.alert("Pronto!", "Conta criada. Agora faça login.");
+      router.replace("/login");
+    } catch (erro) {
+      Alert.alert("Erro", "Não foi possível criar a conta. CPF ou e-mail já usados?");
+    }
   }
 
   return (
@@ -25,17 +31,13 @@ export default function Cadastro() {
       <Image source={require("../../assets/images/logo.png")} style={s.logo} />
       <Text style={s.titulo}>Crie sua conta</Text>
 
-      <Campo
-        rotulo="Nome"
-        placeholder="Digite seu Nome"
-        value={nome}
-        onChangeText={setNome}
-      />
+      <Campo placeholder="Digite seu Nome" value={nome} onChangeText={setNome} />
       <Campo
         placeholder="Digite seu E-mail"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
+        keyboardType="email-address"
       />
       <Campo
         placeholder="Digite seu CPF"

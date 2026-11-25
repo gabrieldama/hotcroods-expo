@@ -1,38 +1,30 @@
-import { PRODUTOS, Produto } from './produtos';
+import { Produto } from "@/services/api";
 
-// ===== CARRINHO =====
-// Guarda quantas unidades de cada produto: { idDoProduto: quantidade }
-// Ex.: { 1: 2, 6: 1 } = 2 coxinhas e 1 coca
-const carrinho: Record<number, number> = {};
+// Guarda o produto e a quantidade: { idDoProduto: { produto, quantidade } }
+const carrinho: Record<number, { produto: Produto; quantidade: number }> = {};
 
 // Quantas unidades desse produto estão no carrinho
 export function quantidade(id: number) {
-  return carrinho[id] ?? 0;
+  return carrinho[id]?.quantidade ?? 0;
 }
 
-// Soma 1
-export function aumentar(id: number) {
-  carrinho[id] = quantidade(id) + 1;
+// Soma 1 (se não existe, adiciona com 1)
+export function aumentar(produto: Produto) {
+  carrinho[produto.id] = { produto, quantidade: quantidade(produto.id) + 1 };
 }
 
 // Tira 1 (se chegar a 0, apaga)
-export function diminuir(id: number) {
-  if (quantidade(id) <= 1) {
-    delete carrinho[id];
+export function diminuir(produto: Produto) {
+  if (quantidade(produto.id) <= 1) {
+    delete carrinho[produto.id];
   } else {
-    carrinho[id] = quantidade(id) - 1;
+    carrinho[produto.id].quantidade -= 1;
   }
 }
 
-// Lista só os produtos que estão no carrinho, com a quantidade
+// Lista o que está no carrinho
 export function itensDoCarrinho() {
-  const itens: { produto: Produto; quantidade: number }[] = [];
-  for (const produto of PRODUTOS) {
-    if (quantidade(produto.id) > 0) {
-      itens.push({ produto, quantidade: quantidade(produto.id) });
-    }
-  }
-  return itens;
+  return Object.values(carrinho);
 }
 
 // Soma de (preço x quantidade)
@@ -47,37 +39,4 @@ export function totalDoCarrinho() {
 // Esvazia
 export function limparCarrinho() {
   for (const id in carrinho) delete carrinho[id];
-}
-
-// ===== PEDIDOS =====
-export type Pedido = {
-  id: number;
-  itens: { produto: Produto; quantidade: number }[];
-  total: number;
-  status: 'Finalizado' | 'Em andamento';
-};
-
-// Começa com 1 pedido de exemplo (igual ao Figma)
-export const pedidos: Pedido[] = [
-  {
-    id: 1,
-    itens: [
-      { produto: PRODUTOS[0], quantidade: 1 },
-      { produto: PRODUTOS[1], quantidade: 1 },
-      { produto: PRODUTOS[2], quantidade: 1 },
-    ],
-    total: 23,
-    status: 'Finalizado',
-  },
-];
-
-// Transforma o carrinho em um pedido novo e esvazia o carrinho
-export function finalizarPedido() {
-  pedidos.push({
-    id: pedidos.length + 1,
-    itens: itensDoCarrinho(),
-    total: totalDoCarrinho(),
-    status: 'Em andamento',
-  });
-  limparCarrinho();
 }
