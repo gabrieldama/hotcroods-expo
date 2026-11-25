@@ -1,18 +1,31 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
-import { Botao } from '@/components/Botao';
-import { Cabecalho } from '@/components/Cabecalho';
-import { paleta } from '@/constants/paleta';
-import { finalizarPedido, itensDoCarrinho, totalDoCarrinho } from '@/data/carrinho';
-import { formatarPreco } from '@/data/produtos';
+import { Botao } from "@/components/Botao";
+import { Cabecalho } from "@/components/Cabecalho";
+import { paleta } from "@/constants/paleta";
+import { itensDoCarrinho, limparCarrinho, totalDoCarrinho } from "@/data/carrinho";
+import { pegarUsuario } from "@/data/sessao";
+import { criarPedido, formatarPreco } from "@/services/api";
+import { router } from "expo-router";
+import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
 
 export default function Checkout() {
   const itens = itensDoCarrinho();
 
-  function finalizar() {
-    finalizarPedido();          // cria o pedido e esvazia o carrinho
-    router.dismissAll();        // fecha Carrinho e Checkout
-    router.replace('/pedidos'); // abre a aba Pedidos
+  async function finalizar() {
+    const usuario = pegarUsuario();
+    if (!usuario) {
+      Alert.alert("Atenção", "Faça login antes de pedir.");
+      return;
+    }
+    try {
+      // A API espera: { usuarioId, produtos: [{ nome, quantidade }] }
+      const produtos = itens.map((i) => ({ nome: i.produto.nome, quantidade: i.quantidade }));
+      await criarPedido(usuario.id, produtos); // POST /pedido
+      limparCarrinho();
+      router.dismissAll();
+      router.replace("/pedidos");
+    } catch (erro) {
+      Alert.alert("Erro", "Não foi possível finalizar o pedido.");
+    }
   }
 
   return (
@@ -44,20 +57,20 @@ export default function Checkout() {
 
 const s = StyleSheet.create({
   tela: { flex: 1, backgroundColor: paleta.fundo, padding: 25, paddingTop: 50 },
-  resumo: { fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 24 },
+  resumo: { fontSize: 20, fontWeight: "bold", textAlign: "center", marginBottom: 24 },
   item: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: paleta.branco,
     borderRadius: 11,
     padding: 20,
     marginBottom: 16,
   },
-  nome: { flex: 1, fontSize: 16, fontWeight: '600' },
-  qtd: { fontWeight: '600', marginRight: 8 },
+  nome: { flex: 1, fontSize: 16, fontWeight: "600" },
+  qtd: { fontWeight: "600", marginRight: 8 },
   totalLinha: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     borderTopWidth: 1,
     borderTopColor: paleta.bordaCampo,
     paddingVertical: 12,

@@ -1,15 +1,30 @@
 import { Cabecalho } from "@/components/Cabecalho";
-import { StatusChip } from "@/components/StatusChip";
 import { paleta } from "@/constants/paleta";
-import { pedidos } from "@/data/carrinho";
-import { formatarPreco } from "@/data/produtos";
+import { buscarPedido, formatarPreco, Pedido } from "@/services/api";
 import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
-// Igual ao detalhes.tsx do SenaiFlix: pega o id da rota e procura o pedido
+// Igual ao detalhes.tsx do SenaiFlix: pega o id e busca na API
 export default function MeuPedido() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const pedido = pedidos.find((p) => p.id === Number(id));
+  const [pedido, setPedido] = useState<Pedido | null>(null);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    buscarPedido(id) // GET /pedido/{id}
+      .then(setPedido)
+      .catch(() => setPedido(null))
+      .finally(() => setCarregando(false));
+  }, [id]);
+
+  if (carregando) {
+    return (
+      <View style={s.tela}>
+        <ActivityIndicator size="large" color={paleta.vermelho} />
+      </View>
+    );
+  }
 
   if (!pedido) {
     return (
@@ -20,62 +35,34 @@ export default function MeuPedido() {
     );
   }
 
+  // A API não manda o total: somamos os valores
+  let total = 0;
+  for (const p of pedido.produtos) total += p.valor;
+
   return (
     <View style={s.tela}>
       <Cabecalho titulo="Meu pedido" />
 
-      <View style={s.status}>
-        <Text style={s.statusTexto}>Status do pedido:</Text>
-        <StatusChip status={pedido.status} />
-      </View>
-
       <View style={s.lista}>
-        {pedido.itens.map((item) => (
-          <View key={item.produto.id} style={s.item}>
-            <Text style={s.nome}>
-              {item.quantidade}x {item.produto.nome}
-            </Text>
-            <Text style={s.preco}>
-              {formatarPreco(item.produto.valor * item.quantidade)}
-            </Text>
+        {pedido.produtos.map((p, i) => (
+          <View key={i} style={s.item}>
+            <Text style={s.nome}>{p.nome}</Text>
+            <Text style={s.preco}>{formatarPreco(p.valor)}</Text>
           </View>
         ))}
       </View>
 
       <View style={s.totalCaixa}>
         <Text style={s.totalRotulo}>Total</Text>
-        <Text style={s.totalValor}>{formatarPreco(pedido.total)}</Text>
+        <Text style={s.totalValor}>{formatarPreco(total)}</Text>
       </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  tela: {
-    flex: 1,
-    backgroundColor: paleta.fundo,
-    padding: 20,
-    paddingTop: 50,
-  },
-  status: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: paleta.branco,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 24,
-  },
-  statusTexto: {
-    fontSize: 15,
-    fontWeight: "bold",
-  },
-  lista: {
-    backgroundColor: paleta.branco,
-    borderRadius: 14,
-    padding: 20,
-    gap: 16,
-  },
+  tela: { flex: 1, backgroundColor: paleta.fundo, padding: 20, paddingTop: 50 },
+  lista: { backgroundColor: paleta.branco, borderRadius: 14, padding: 20, gap: 16 },
   item: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -83,14 +70,8 @@ const s = StyleSheet.create({
     borderRadius: 11,
     padding: 16,
   },
-  nome: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: paleta.branco,
-  },
-  preco: {
-    color: paleta.branco,
-  },
+  nome: { fontSize: 16, fontWeight: "600", color: paleta.branco },
+  preco: { color: paleta.branco },
   totalCaixa: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -101,12 +82,6 @@ const s = StyleSheet.create({
     marginTop: "auto",
     marginBottom: 20,
   },
-  totalRotulo: {
-    fontSize: 15,
-    color: paleta.textoPreco,
-  },
-  totalValor: {
-    fontSize: 24,
-    color: paleta.textoPreco,
-  },
+  totalRotulo: { fontSize: 15, color: paleta.textoPreco },
+  totalValor: { fontSize: 24, color: paleta.textoPreco },
 });
